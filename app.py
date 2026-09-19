@@ -114,4 +114,30 @@ with tab3:
         st.error(f"Failed to fetch sports data: {e}")
 
 with tab4:
-    st.write("News content coming soon...")
+    st.subheader("Latest Headlines")
+
+    topic = st.text_input("Search topic", value="technology")
+
+    if topic:
+        api_key = st.secrets["NEWS_API_KEY"]
+        url = f"https://newsapi.org/v2/everything?q={topic}&sortBy=publishedAt&language=en&apiKey={api_key}"
+
+        try:
+            response = requests.get(url, timeout=10)
+            response.raise_for_status()
+            data = response.json()
+
+            articles = data.get('articles', [])[:8]  # show top 8
+
+            if articles:
+                for article in articles:
+                    st.markdown(f"**[{article['title']}]({article['url']})**")
+                    st.caption(f"{article['source']['name']} • {article['publishedAt'][:10]}")
+                    st.write("---")
+            else:
+                st.info(f"No articles found for '{topic}'.")
+
+        except requests.exceptions.HTTPError:
+            st.error("API key invalid or not yet activated, or rate limit reached.")
+        except requests.exceptions.RequestException as e:
+            st.error(f"Failed to fetch news data: {e}")
