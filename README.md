@@ -42,8 +42,8 @@ Unlike the earlier projects in this portfolio, which analyze static or periodica
 3. Get free API keys from [OpenWeatherMap](https://openweathermap.org/api) and [NewsAPI](https://newsapi.org/) (CoinGecko and TheSportsDB test tier need no key)
 4. Create `.streamlit/secrets.toml`:
 ```toml
-   OPENWEATHER_API_KEY = "your_key_here"
-   NEWS_API_KEY = "your_key_here"
+   OPENWEATHER_API_KEY = "type_in_your_key_here"
+   NEWS_API_KEY = "type_in_your_key_here"
 ```
 5. Run: `streamlit run app.py`
 
