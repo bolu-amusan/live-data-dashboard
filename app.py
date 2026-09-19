@@ -75,7 +75,43 @@ with tab2:
         st.info("Select at least one coin above.")
 
 with tab3:
-    st.write("Sports content coming soon...")
+    st.subheader("Recent Match Results")
+
+    league_options = {
+        "English Premier League": "4328",
+        "Spanish La Liga": "4335",
+        "UEFA Champions League": "4480",
+        "NBA": "4387"
+    }
+
+    league_name = st.selectbox("Select a league", options=list(league_options.keys()))
+    league_id = league_options[league_name]
+
+    url = f"https://www.thesportsdb.com/api/v1/json/3/eventspastleague.php?id={league_id}"
+
+    try:
+        response = requests.get(url, timeout=10)
+        response.raise_for_status()
+        data = response.json()
+
+        events = data.get('events')
+
+        if events:
+            rows = []
+            for event in events[:10]:  # show 10 most recent
+                rows.append({
+                    "Date": event.get('dateEvent'),
+                    "Home": event.get('strHomeTeam'),
+                    "Score": f"{event.get('intHomeScore', '-')} - {event.get('intAwayScore', '-')}",
+                    "Away": event.get('strAwayTeam')
+                })
+            df_matches = pd.DataFrame(rows)
+            st.dataframe(df_matches, use_container_width=True)
+        else:
+            st.info(f"No recent match data available for {league_name}.")
+
+    except requests.exceptions.RequestException as e:
+        st.error(f"Failed to fetch sports data: {e}")
 
 with tab4:
     st.write("News content coming soon...")
