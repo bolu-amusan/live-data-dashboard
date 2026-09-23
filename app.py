@@ -45,7 +45,9 @@ with tab2:
 
     coins = st.multiselect(
         "Select coins to track",
-        options=["bitcoin", "ethereum", "solana", "cardano", "dogecoin"],
+        options=["bitcoin", "ethereum", "solana", "cardano", "dogecoin", 
+                 "ripple", "polkadot", "litecoin", "chainlink", "avalanche-2", 
+                 "polygon", "binancecoin", "tron", "shiba-inu", "uniswap"],
         default=["bitcoin", "ethereum", "solana"]
     )
 
@@ -80,8 +82,13 @@ with tab3:
     league_options = {
         "English Premier League": "4328",
         "Spanish La Liga": "4335",
+        "Italian Serie A": "4332",
+        "German Bundesliga": "4331",
+        "French Ligue 1": "4334",
         "UEFA Champions League": "4480",
-        "NBA": "4387"
+        "NBA": "4387",
+        "NFL": "4391",
+        "NHL": "4380"
     }
 
     league_name = st.selectbox("Select a league", options=list(league_options.keys()))
