@@ -76,47 +76,106 @@ with tab2:
     else:
         st.info("Select at least one coin above.")
 
+
+## ---- Using TheSportsDB API (commented out) ---- ##
+# with tab3:
+#     st.subheader("Recent Match Results")
+
+#     league_options = {
+#         "English Premier League": "4328",
+#         "Spanish La Liga": "4335",
+#         "Italian Serie A": "4332",
+#         "German Bundesliga": "4331",
+#         "French Ligue 1": "4334",
+#         "UEFA Champions League": "4480",
+#         "NBA": "4387",
+#         "NFL": "4391",
+#         "NHL": "4380"
+#     }
+
+#     league_name = st.selectbox("Select a league", options=list(league_options.keys()))
+#     league_id = league_options[league_name]
+
+#     num_results = st.slider("Number of recent matches to show", min_value=5, max_value=25, value=15)
+
+#     url = f"https://www.thesportsdb.com/api/v1/json/3/eventspastleague.php?id={league_id}"
+
+#     try:
+#         response = requests.get(url, timeout=10)
+#         response.raise_for_status()
+#         data = response.json()
+
+#         events = data.get('events')
+#         st.write(f"DEBUG: API returned {len(events) if events else 0} total events")
+
+#         if events:
+#             rows = []
+#             for event in events[:num_results]:
+#                 rows.append({
+#                     "Round": event.get('intRound', 'N/A'),
+#                     "Date": event.get('dateEvent'),
+#                     "Home": event.get('strHomeTeam'),
+#                     "Score": f"{event.get('intHomeScore', '-')} - {event.get('intAwayScore', '-')}",
+#                     "Away": event.get('strAwayTeam')
+#                 })
+
+#             df_matches = pd.DataFrame(rows)
+#             st.dataframe(df_matches, use_container_width=True)
+
+#         else:
+#             st.info(f"No recent match data available for {league_name}.")
+
+#     except requests.exceptions.RequestException as e:
+#         st.error(f"Failed to fetch sports data: {e}")
+
+
+## ---- Using football-data.org API instead of TheSportsDB ---- ##
 with tab3:
     st.subheader("Recent Match Results")
 
     league_options = {
-        "English Premier League": "4328",
-        "Spanish La Liga": "4335",
-        "Italian Serie A": "4332",
-        "German Bundesliga": "4331",
-        "French Ligue 1": "4334",
-        "UEFA Champions League": "4480",
-        "NBA": "4387",
-        "NFL": "4391",
-        "NHL": "4380"
+        "English Premier League": "PL",
+        "Spanish La Liga": "PD",
+        "Italian Serie A": "SA",
+        "German Bundesliga": "BL1",
+        "French Ligue 1": "FL1",
+        "UEFA Champions League": "CL"
     }
 
     league_name = st.selectbox("Select a league", options=list(league_options.keys()))
-    league_id = league_options[league_name]
+    competition_code = league_options[league_name]
 
-    url = f"https://www.thesportsdb.com/api/v1/json/3/eventspastleague.php?id={league_id}"
+    num_results = st.slider("Number of recent matches to show", min_value=5, max_value=25, value=15)
+
+    api_key = st.secrets["FOOTBALL_DATA_API_KEY"]
+    url = f"https://api.football-data.org/v4/competitions/{competition_code}/matches?status=FINISHED"
+    headers = {"X-Auth-Token": api_key}
 
     try:
-        response = requests.get(url, timeout=10)
+        response = requests.get(url, headers=headers, timeout=10)
         response.raise_for_status()
         data = response.json()
 
-        events = data.get('events')
+        matches = data.get('matches', [])
+        matches_sorted = sorted(matches, key=lambda m: m['utcDate'], reverse=True)[:num_results]
 
-        if events:
+        if matches_sorted:
             rows = []
-            for event in events[:10]:  # show 10 most recent
+            for match in matches_sorted:
                 rows.append({
-                    "Date": event.get('dateEvent'),
-                    "Home": event.get('strHomeTeam'),
-                    "Score": f"{event.get('intHomeScore', '-')} - {event.get('intAwayScore', '-')}",
-                    "Away": event.get('strAwayTeam')
+                    "Matchday": match.get('matchday'),
+                    "Date": match['utcDate'][:10],
+                    "Home": match['homeTeam']['name'],
+                    "Score": f"{match['score']['fullTime']['home']} - {match['score']['fullTime']['away']}",
+                    "Away": match['awayTeam']['name']
                 })
             df_matches = pd.DataFrame(rows)
             st.dataframe(df_matches, use_container_width=True)
         else:
             st.info(f"No recent match data available for {league_name}.")
 
+    except requests.exceptions.HTTPError:
+        st.error("API key invalid, not yet activated, or rate limit reached (10 requests/minute on free tier).")
     except requests.exceptions.RequestException as e:
         st.error(f"Failed to fetch sports data: {e}")
 
