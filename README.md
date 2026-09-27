@@ -42,12 +42,13 @@ Unlike the earlier projects in this portfolio, which analyze static or periodica
 3. Get free API keys from [OpenWeatherMap](https://openweathermap.org/api) and [NewsAPI](https://newsapi.org/) (CoinGecko and TheSportsDB test tier need no key)
 4. Create `.streamlit/secrets.toml`:
 ```toml
-   OPENWEATHER_API_KEY = "type_in_your_key_here"
-   NEWS_API_KEY = "type_in_your_key_here"
+   OPENWEATHER_API_KEY = "type_in_your_key"
+   NEWS_API_KEY = "type_in_your_key"
+   OPENWEATHER_API_KEY = "type_in_your_key"
 ```
 5. Run: `streamlit run app.py`
 
 ## Honest Limitations
-- TheSportsDB is used via its free public test key, which is rate-limited and intended for development — a production version would use a paid tier or a more robust sports API
+- Sports data is sourced from football-data.org's free tier, covering 12 major competitions with a 10 requests/minute rate limit — sufficient for this dashboard's usage pattern.
 - NewsAPI's free tier has request limits and some restrictions on commercial use
 - No caching is implemented — every tab interaction triggers a fresh API call, which is fine for a portfolio demo but would need rate-limit-aware caching (e.g., `st.cache_data` with a TTL) for heavier real-world use
